@@ -1,12 +1,24 @@
 # Use Maven image to build the JAR
-FROM maven:3.9.4-eclipse-temurin-21 AS builder
-WORKDIR /app
+FROM maven:3.9.10-eclipse-temurin-21 AS builder
+WORKDIR /build
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Use a slim runtime image
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app
-COPY --from=builder /app/target/todo-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Extract layers from JAR
+FROM eclipse-temurin:21-jre-alpine-3.21 AS layers
+WORKDIR /layer
+COPY --from=builder /build/target/app-0.0.1-SNAPSHOT.jar app.jar
+RUN java -Djarmode=layertools -jar app.jar extract
+
+# Assemble stage
+FROM eclipse-temurin:21-jre-alpine-3.21
+WORKDIR /opt/app
+RUN addgroup --system appuser && adduser -S -s -G appuser appuser
+COPY --from=layers /layer/dependencies/ ./
+COPY --from=layers /layer/spring-boot-loader/ ./
+COPY --from=layers /layer/snapshot-dependencies/ ./
+COPY --from=layers /layer/application/ ./
+RUN chown -R appuser:appuser /opt/app
+USER appuser
+HEALTHCHECK --interval=30s --timeout=3s --retries=1 CMD wget -qO- http://localhost:8080/actuator/health/ | grep UP || exit 1
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
