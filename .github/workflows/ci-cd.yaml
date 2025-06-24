@@ -70,3 +70,5 @@ jobs:
             sudo docker compose up -d
             mv ~/todo-3000-monorepo-current ~/todo-3000-monorepo-old || true
             mv ~/todo-3000-monorepo-new ~/todo-3000-monorepo-current
+            sudo chown -R deployer:deployer ~/todo-3000-monorepo-*
+            sudo chmod -R 750 ~/todo-3000-monorepo-*  
