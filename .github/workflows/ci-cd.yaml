@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           source: "compose.yaml"
-          target: "~/todo-3000-monorepo/compose.yaml"
+          target: "~/todo-3000-monorepo/"
 
       - name: SSH into droplet and deploy
         uses: appleboy/ssh-action@v0.1.7
