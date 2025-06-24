@@ -1,7 +1,6 @@
 services:
   backend:
-    build:
-      context: ./backend
+    image: havrem/todo-backend:latest
     container_name: todo-backend
     ports:
       - "8080:8080"
@@ -12,10 +11,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_API_URL: "http://backend:8080/api"
+    image: havrem/todo-frontend:latest
     container_name: todo-frontend
     ports:
       - "80:80"
