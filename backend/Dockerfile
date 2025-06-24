@@ -7,7 +7,7 @@ RUN mvn clean package -DskipTests
 # Extract layers from JAR
 FROM eclipse-temurin:21-jre-alpine-3.21 AS layers
 WORKDIR /layer
-COPY --from=builder /build/target/app-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /build/target/todo-0.0.1-SNAPSHOT.jar app.jar
 RUN java -Djarmode=layertools -jar app.jar extract
 
 # Assemble stage
