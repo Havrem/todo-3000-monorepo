@@ -1,0 +1,13 @@
+.mainContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  border-bottom: 0.05rem solid rgb(0, 0, 0);
+  padding-block: 1rem;
+
+  .left {
+    margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+  }
+}

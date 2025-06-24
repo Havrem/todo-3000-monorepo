@@ -1,0 +1,75 @@
+/* roboto-condensed-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: "Roboto Condensed";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/roboto-condensed-v30-latin-regular.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+/* roboto-condensed-700 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: "Roboto Condensed";
+  font-style: normal;
+  font-weight: 700;
+  src: url("../fonts/roboto-condensed-v30-latin-700.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+.mainContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  button {
+    border: 0.05rem solid rgb(0, 0, 0);
+    padding-inline: 2rem;
+    background-color: rgb(221, 248, 208);
+  }
+}
+
+.fields {
+  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  padding: 0.5rem;
+  flex: 1;
+  border: 0.05rem solid rgb(0, 0, 0);
+  gap: 1rem;
+  background-color: rgb(221, 248, 208);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  .top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input {
+      padding: 0.5rem;
+      border: 0;
+      flex: 1;
+    }
+
+    label {
+      color: rgb(0, 0, 0);
+      margin-bottom: 0.3rem;
+      font-family: "Roboto Condensed";
+      font-weight: 700;
+      font-size: 1rem;
+    }
+  }
+
+  .error {
+    p {
+      margin: 0;
+      font-size: smaller;
+      color: rgb(253, 0, 0);
+    }
+  }
+}

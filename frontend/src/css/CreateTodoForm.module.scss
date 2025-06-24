@@ -1,0 +1,50 @@
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 1rem;
+  background-color: rgb(239, 255, 240);
+
+  h1 {
+    text-align: center;
+  }
+
+  button {
+    cursor: pointer;
+    border: 0;
+    border: 0.05rem solid rgb(0, 0, 0);
+    padding: 0.7rem;
+  }
+
+  button.add {
+    background-color: rgb(221, 248, 208);
+  }
+
+  button.cancel {
+    background-color: #e7e7e7;
+  }
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+
+  p {
+    margin: 0;
+    font-size: small;
+    color: #ff0000;
+  }
+
+  input {
+    padding: 0.5rem;
+  }
+
+  label {
+    color: rgb(0, 0, 0);
+    margin-bottom: 0.3rem;
+    font-family: "Roboto Condensed";
+    font-weight: 700;
+    font-size: 1rem;
+  }
+}
