@@ -10,6 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Cleanup old deploy folders on droplet
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            rm -rf ~/todo-3000-monorepo-new
+            rm -rf ~/todo-3000-monorepo-old
+
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -36,16 +46,17 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           source: "compose.yaml"
-          target: "~/todo-3000-monorepo"
+          target: "~/todo-3000-monorepo-new"
 
-      - name: Copy .env.prod to droplet
-        uses: appleboy/scp-action@v0.1.7
+      - name: Create .env.prod on droplet
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_IP }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          source: "./backend/.env.prod"
-          target: "~/todo-3000-monorepo/backend"
+          script: |
+            mkdir -p ~/todo-3000-monorepo-new/backend
+            echo "${{ secrets.BACKEND_ENV }}" > ~/todo-3000-monorepo-new/backend/.env.prod
 
       - name: SSH into droplet and deploy
         uses: appleboy/ssh-action@v0.1.7
@@ -54,6 +65,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            cd ~/todo-3000-monorepo
+            cd ~/todo-3000-monorepo-new
             sudo docker compose pull
             sudo docker compose up -d
+            mv ~/todo-3000-monorepo-current ~/todo-3000-monorepo-old || true
+            mv ~/todo-3000-monorepo-new ~/todo-3000-monorepo-current
