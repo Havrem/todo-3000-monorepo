@@ -1,3 +1,7 @@
+networks:
+  app-network:
+    driver: bridge
+
 services:
   backend:
     image: havrem/todo-backend:latest
@@ -9,6 +13,8 @@ services:
     volumes:
       - ./firebase/firebase-config.json:/secrets/firebase-config.json
     restart: unless-stopped
+    networks:
+      - app-network
 
   frontend:
     image: havrem/todo-frontend:latest
@@ -18,3 +24,5 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+    networks:
+      - app-network
