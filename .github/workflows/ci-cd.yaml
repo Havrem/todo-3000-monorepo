@@ -69,6 +69,17 @@ jobs:
             mkdir -p ~/todo-3000-monorepo-new/backend
             echo "${{ secrets.BACKEND_ENV }}" > ~/todo-3000-monorepo-new/backend/.env.prod
 
+      - name: Create firebase-config.json on droplet
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            mkdir -p ~/todo-3000-monorepo-new/firebase
+            echo "${{ secrets.FIREBASE_CONFIG }}" > ~/todo-3000-monorepo-new/firebase/firebase-config.json
+            chmod 600 ~/todo-3000-monorepo-new/firebase/firebase-config.json
+
       - name: SSH into droplet and deploy
         uses: appleboy/ssh-action@v0.1.7
         with:
