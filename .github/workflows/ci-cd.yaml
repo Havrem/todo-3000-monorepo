@@ -17,8 +17,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            rm -rf ~/todo-3000-monorepo-new
-            rm -rf ~/todo-3000-monorepo-old
+            sudo rm -rf ~/todo-3000-monorepo-new
+            sudo rm -rf ~/todo-3000-monorepo-old
 
       - name: Fix permissions on deploy folder
         uses: appleboy/ssh-action@v0.1.7
