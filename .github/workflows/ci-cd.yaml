@@ -20,7 +20,7 @@ jobs:
             sudo rm -rf /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
             sudo rm -rf /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-old
 
-      - name: Fix permissions on deploy folder
+      - name: Prepare deploy directory
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_IP }}
@@ -28,10 +28,10 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
             mkdir -p /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
-            sudo chown -R ${{ secrets.DROPLET_USER }}:${{ secrets.DROPLET_USER }} /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+            sudo chown -R ${{ secrets.DROPLET_USER }}:$                                                {{ secrets.DROPLET_USER }} /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
             sudo chmod -R 755 /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
 
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
@@ -47,17 +47,18 @@ jobs:
 
       - name: Build & push frontend image
         run: |
-          docker build --build-arg VITE_API_URL="/api" -t ${{ secrets.DOCKER_USERNAME }}/todo-frontend:latest ./frontend
+          docker build --build-arg VITE_API_URL="/api" \
+            -t ${{ secrets.DOCKER_USERNAME }}/todo-frontend:latest ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/todo-frontend:latest
 
-      - name: Copy compose file to droplet
+      - name: Copy compose.yaml to droplet
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_IP }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           source: "compose.yaml"
-          target: "/home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/docker-compose.yml"
+          target: "/home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/"
 
       - name: Create .env.prod on droplet
         uses: appleboy/ssh-action@v0.1.7
@@ -67,7 +68,9 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
             mkdir -p /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/backend
-            echo "${{ secrets.BACKEND_ENV }}" > /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/backend/.env.prod
+            echo "${{ secrets.BACKEND_ENV }}" \
+              > /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/backend/.env.prod
+            chmod 600 /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/backend/.env.prod
 
       - name: Create firebase-config.json on droplet
         uses: appleboy/ssh-action@v0.1.7
@@ -76,3 +79,26 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
+            mkdir -p /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase
+            echo "${{ secrets.FIREBASE_CONFIG }}" \
+              > /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase/firebase-config.json
+            chmod 600 /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase/firebase-config.json
+
+      - name: SSH into droplet and deploy
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+            # Ensure fresh pull + recreate
+            sudo docker compose up -d \
+              --pull always \
+              --force-recreate \
+              --remove-orphans
+            # Rotate symlinks
+            mv /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-current \
+               /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-old || true
+            mv /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new \
+               /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-current
