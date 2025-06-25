@@ -26,5 +26,5 @@ COPY --from=builder /build/target/todo-0.0.1-SNAPSHOT.jar app.jar
 
 RUN chown -R appuser:appuser /opt/app
 USER appuser
-HEALTHCHECK --interval=30s --timeout=3s --retries=1 CMD wget -qO- http://localhost:8080/actuator/health/ | grep UP || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --retries=1 CMD wget -qO- http://localhost:8080/actuator/health | grep UP || exit 1
 ENTRYPOINT ["java", "-jar", "app.jar"]
