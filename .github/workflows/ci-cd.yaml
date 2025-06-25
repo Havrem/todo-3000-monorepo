@@ -17,8 +17,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            sudo rm -rf ~/todo-3000-monorepo-new
-            sudo rm -rf ~/todo-3000-monorepo-old
+            sudo rm -rf /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+            sudo rm -rf /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-old
 
       - name: Fix permissions on deploy folder
         uses: appleboy/ssh-action@v0.1.7
@@ -27,9 +27,9 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            mkdir -p ~/todo-3000-monorepo-new
-            sudo chown -R deployer:deployer ~/todo-3000-monorepo-new
-            sudo chmod -R 755 ~/todo-3000-monorepo-new
+            mkdir -p /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+            sudo chown -R ${{ secrets.DROPLET_USER }}:${{ secrets.DROPLET_USER }} /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+            sudo chmod -R 755 /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
 
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -50,14 +50,14 @@ jobs:
           docker build --build-arg VITE_API_URL="/api" -t ${{ secrets.DOCKER_USERNAME }}/todo-frontend:latest ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/todo-frontend:latest
 
-      - name: Copy compose.yaml to droplet
+      - name: Copy compose file to droplet
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_IP }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           source: "compose.yaml"
-          target: "~/todo-3000-monorepo-new"
+          target: "/home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/docker-compose.yml"
 
       - name: Create .env.prod on droplet
         uses: appleboy/ssh-action@v0.1.7
@@ -66,8 +66,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            mkdir -p ~/todo-3000-monorepo-new/backend
-            echo "${{ secrets.BACKEND_ENV }}" > ~/todo-3000-monorepo-new/backend/.env.prod
+            mkdir -p /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/backend
+            echo "${{ secrets.BACKEND_ENV }}" > /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/backend/.env.prod
 
       - name: Create firebase-config.json on droplet
         uses: appleboy/ssh-action@v0.1.7
@@ -76,21 +76,3 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            mkdir -p ~/todo-3000-monorepo-new/firebase
-            echo "${{ secrets.FIREBASE_CONFIG }}" > ~/todo-3000-monorepo-new/firebase/firebase-config.json
-            chmod 600 ~/todo-3000-monorepo-new/firebase/firebase-config.json
-
-      - name: SSH into droplet and deploy
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.DROPLET_IP }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          script: |
-            cd ~/todo-3000-monorepo-new
-            sudo docker compose -f compose.yaml up -d \
-              --pull always \
-              --force-recreate \
-              --remove-orphans
-            mv ~/todo-3000-monorepo-current ~/todo-3000-monorepo-old || true
-            mv ~/todo-3000-monorepo-new ~/todo-3000-monorepo-current
