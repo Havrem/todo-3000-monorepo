@@ -79,16 +79,18 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            # ditch any stray directory or file
-            rm -rf /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase/firebase-config.json
-            # ensure the folder exists
-            mkdir -p /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase
-            # write the secret JSON in one shot (preserves newlines!)
-            cat << 'EOF' > /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase/firebase-config.json
+            BASE=/home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase
+            # remove any file or dir named firebase-config.json
+            sudo rm -rf $BASE/firebase-config.json
+            # ensure the firebase directory exists
+            sudo mkdir -p $BASE
+            # write the JSON into the file via tee (preserves newlines)
+            cat <<EOF | sudo tee $BASE/firebase-config.json >/dev/null
             ${{ secrets.FIREBASE_CONFIG }}
             EOF
             # lock it down
-            chmod 600 /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new/firebase/firebase-config.json
+            sudo chmod 600 $BASE/firebase-config.json
+
 
 
       - name: SSH into droplet and deploy
