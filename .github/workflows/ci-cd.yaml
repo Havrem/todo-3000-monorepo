@@ -27,9 +27,14 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
+            # Remove any stale folder (including root‐owned leftovers)
+            sudo rm -rf /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+            # Recreate and own it as the deployer user
             mkdir -p /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
-            sudo chown -R ${{ secrets.DROPLET_USER }}:$                                                {{ secrets.DROPLET_USER }} /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+            sudo chown -R ${{ secrets.DROPLET_USER }}:${{ secrets.DROPLET_USER }} \
+              /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
             sudo chmod -R 755 /home/${{ secrets.DROPLET_USER }}/todo-3000-monorepo-new
+
 
       - name: Checkout code
         uses: actions/checkout@v3
