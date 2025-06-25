@@ -78,6 +78,6 @@ jobs:
           script: |
             cd ~/todo-3000-monorepo-new
             sudo docker compose pull
-            sudo docker compose up -d
+            sudo docker compose up -d --force-recreate --remove-orphans
             mv ~/todo-3000-monorepo-current ~/todo-3000-monorepo-old || true
             mv ~/todo-3000-monorepo-new ~/todo-3000-monorepo-current
